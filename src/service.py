@@ -3,7 +3,10 @@ import sqlite3
 import qr_generator
 from io import BytesIO
 import base64
-from db_service import DbService
+from actions import Actions
+from db_qrcode_service import DbQrcodeService
+from db_actions_service import DbActionsService
+from qrcodemodel import QrCode
 
 
 # run the application on port 5000 and static ip address.
@@ -12,7 +15,8 @@ class Service:
         self.app = Flask(__name__)
         self.last_code = None
         self.setup_routes()
-        self.dbService = DbService()
+        self.dbService = DbQrcodeService()
+        self.dbActionsService = DbActionsService()
 
     def serve_pil_image(self, pil_img):
         img_io = BytesIO()
@@ -40,13 +44,22 @@ class Service:
         def qr():
             if request.method == "GET":
                 img, self.last_code = qr_generator.generateRandomQr()
-                self.dbService.add(1, self.last_code)  # db addition
+                self.dbService.add(
+                    action=Actions(id=1), code=self.last_code.code
+                )  # db addition
                 return self.serve_pil_image(img)
 
-        @self.app.route("/get_all", methods=["GET"])
+        @self.app.route("/get_all_codes", methods=["GET"])
         def get_all():
             if request.method == "GET":
-                return jsonify(self.dbService.get_all())
+                return jsonify(self.dbService.get_all())  # TODO make it serializable
+
+        @self.app.route("/get_all_actions", methods=["GET"])
+        def get_all_actions():
+            if request.method == "GET":
+                return jsonify(
+                    self.dbActionsService.get_all()
+                )  # TODO make it serializable
 
     def run(self):
         self.app.run(host="0.0.0.0", port=5000, debug=True)

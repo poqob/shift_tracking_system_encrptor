@@ -1,14 +1,17 @@
 import sqlite3
 import configparser
+from qrcodemodel import QrCode
+from actions import Actions
+from typing import List
 
 
-class DbService:
+class DbQrcodeService:
     config = configparser.ConfigParser()
     config.read("../config/config.ini")
     db_address = config["database"]["path"]
     name = config["database"]["name"]
 
-    def add(self, action: int, code: str):
+    def add(self, action: Actions, code: str):
         conn = sqlite3.connect(self.db_address)
         cursor = conn.cursor()
 
@@ -19,7 +22,7 @@ class DbService:
             """.format(
                 self.name
             ),
-            (action, code),
+            (action.id, code),
         )
 
         conn.commit()
@@ -38,21 +41,29 @@ class DbService:
         conn.commit()
         conn.close()
 
-    def get_all(self):
+    def get_all(self) -> List[QrCode]:
         conn = sqlite3.connect(self.db_address)
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT * FROM {n}
-        """.format(
+                SELECT * FROM {n}
+            """.format(
                 n=self.name
             )
         )
         result = cursor.fetchall()
         conn.close()
-        return result
 
-    def get_by_code(self, code: str):
+        qr_codes = []
+        for row in result:
+            qr_code = QrCode(
+                row[0], row[1]
+            )  # Assuming QrCode class takes two arguments: id and code
+            qr_codes.append(qr_code)
+
+        return qr_codes
+
+    def get_by_code(self, code: str) -> QrCode:
         conn = sqlite3.connect(self.db_address)
         try:
             cursor = conn.cursor()
@@ -66,12 +77,16 @@ class DbService:
             )
             result = cursor.fetchone()
             conn.close()
-        except:
-            result = None
-            return Exception("Error in db_service get_by_code() function")
-        return result
+            if result:
+                qr_code = QrCode(result[0], result[1])
+                return qr_code
+            else:
+                return None
+        except Exception as e:
+            print("Error in db_service get_by_code() function:", e)
+            return None
 
-    def get_by_action(self, action: int):
+    def get_by_action(self, action: Actions):
         conn = sqlite3.connect(self.db_address)
         cursor = conn.cursor()
         cursor.execute(
@@ -80,7 +95,7 @@ class DbService:
         """.format(
                 table_name=self.name
             ),
-            (action,),
+            (action.id,),
         )
         result = cursor.fetchall()
         conn.close()
