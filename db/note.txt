@@ -1,0 +1,12 @@
+local qr code db
+
+qr_code, db_service table
+
+actions:
+id:int, name:str(15)
++1,default
+
+
+qrcode:
+id,zaman,kod,aksiyon(giriş0-çıkış1-mola2...3.4.5..)
+id:sequancial,time:time_Stamp,action:int(fk),code:str(15)

@@ -1,5 +1,4 @@
 import qrcode
-import io
 import random
 import string
 
@@ -10,5 +9,6 @@ def generateRandomQr():
 
     img = qrcode.make(random_string)
     type(img)  # qrcode.image.pil.PilImage
-    img.save("some_file.png")
+    # img.save(f"../resources/{random_string}.png")
+    print(random_string)
     return img, random_string
