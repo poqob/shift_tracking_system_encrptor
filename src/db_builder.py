@@ -18,16 +18,18 @@ class DbBuilder:
             CREATE TABLE IF NOT EXISTS actions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(15)
-            )
+            );
         """
         )
 
-        # actions table
-        cursor.execute(
-            f"""
-             insert into actions (name) values ('default')
-        """
-        )
+        # actions table default values
+        count: int = cursor.execute("SELECT COUNT(*) FROM actions").fetchone()[0]
+        if count == 0:
+            cursor.execute(
+                """
+                INSERT INTO actions (name) VALUES ('default');
+            """
+            )
 
         # qrcode table
         cursor.execute(

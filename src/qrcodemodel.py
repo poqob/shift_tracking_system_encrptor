@@ -1,4 +1,4 @@
-from actions import Actions
+from actionsmodel import Actions
 
 
 class QrCode:
@@ -8,11 +8,19 @@ class QrCode:
         self.id = id
         self.time = time
         self.code = code
-        self.action = Actions(action)
+        self.action = action
 
     def parse(self, data):
         self.id = data["id"]
         self.time = data["time"]
         self.code = data["code"]
-        self.action = Actions(data["action"])
+        self.action = Actions().parse(data["action"])
         return self
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "time": self.time,
+            "code": self.code,
+            "action": self.action.serialize(),
+        }

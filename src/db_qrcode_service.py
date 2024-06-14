@@ -1,7 +1,8 @@
 import sqlite3
 import configparser
 from qrcodemodel import QrCode
-from actions import Actions
+from actionsmodel import Actions
+from db_actions_service import DbActionsService
 from typing import List
 
 
@@ -46,7 +47,7 @@ class DbQrcodeService:
         cursor = conn.cursor()
         cursor.execute(
             """
-                SELECT * FROM {n}
+                SELECT * FROM {n} ;
             """.format(
                 n=self.name
             )
@@ -56,11 +57,14 @@ class DbQrcodeService:
 
         qr_codes = []
         for row in result:
+            action = DbActionsService().get_by_id(id=row[2])
             qr_code = QrCode(
-                row[0], row[1]
-            )  # Assuming QrCode class takes two arguments: id and code
+                id=row[0],
+                time=row[1],
+                action=Actions(id=action.id, name=action.name),
+                code=row[3],
+            )
             qr_codes.append(qr_code)
-
         return qr_codes
 
     def get_by_code(self, code: str) -> QrCode:

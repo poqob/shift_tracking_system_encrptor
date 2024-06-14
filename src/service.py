@@ -3,7 +3,7 @@ import sqlite3
 import qr_generator
 from io import BytesIO
 import base64
-from actions import Actions
+from actionsmodel import Actions
 from db_qrcode_service import DbQrcodeService
 from db_actions_service import DbActionsService
 from qrcodemodel import QrCode
@@ -52,14 +52,16 @@ class Service:
         @self.app.route("/get_all_codes", methods=["GET"])
         def get_all():
             if request.method == "GET":
-                return jsonify(self.dbService.get_all())  # TODO make it serializable
+                codes = self.dbService.get_all()
+                serialized_codes = [code.serialize() for code in codes]
+                return jsonify(serialized_codes)
 
         @self.app.route("/get_all_actions", methods=["GET"])
         def get_all_actions():
             if request.method == "GET":
-                return jsonify(
-                    self.dbActionsService.get_all()
-                )  # TODO make it serializable
+                actions = self.dbActionsService.get_all()
+                serialized_actions = [action.serialize() for action in actions]
+                return jsonify(serialized_actions)
 
     def run(self):
         self.app.run(host="0.0.0.0", port=5000, debug=True)

@@ -1,4 +1,4 @@
-from actions import Actions
+from actionsmodel import Actions
 import configparser
 from typing import List
 import sqlite3
@@ -42,7 +42,7 @@ class DbActionsService:
         cursor.execute(f"SELECT * FROM actions WHERE id = {id}")
         row = cursor.fetchone()
         conn.close()
-        return Actions().parse(row)
+        return Actions(id=row[0], name=row[1])
 
     def get_all(self) -> List[Actions]:
         conn = sqlite3.connect(self.db_address)
@@ -50,4 +50,5 @@ class DbActionsService:
         cursor.execute("SELECT * FROM actions")
         rows = cursor.fetchall()
         conn.close()
-        return [Actions().parse(row) for row in rows]
+
+        return [Actions(id=row[0], name=row[1]) for row in rows]
